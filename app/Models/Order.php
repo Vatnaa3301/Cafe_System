@@ -9,6 +9,7 @@ class Order extends Model
     protected $fillable = [
         'user_id',
         'customer_name',
+        'cashier_name',
         'subtotal',
         'tax',
         'total',
@@ -16,6 +17,9 @@ class Order extends Model
         'discount',
         'status',
         'notes',
+        'payment_method',
+        'currency',
+        'order_type',
     ];
 
     protected $casts = [

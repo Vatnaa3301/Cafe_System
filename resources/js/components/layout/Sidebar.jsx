@@ -42,6 +42,16 @@ const navItems = [
             </svg>
         ),
     },
+    {
+        to: '/admin/cashiers',
+        label: 'Cashiers',
+        icon: (
+            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="8" r="4" />
+                <path d="M4 20c0-4 3.582-7 8-7s8 3 8 7" />
+            </svg>
+        ),
+    },
 ];
 
 export default function Sidebar() {
@@ -54,21 +64,13 @@ export default function Sidebar() {
     };
 
     return (
-        <aside className="w-64 min-h-screen bg-white border-r border-gray-100 flex flex-col shadow-sm">
+        <aside className="w-64 min-h-screen bg-[#F8F8F8] border-r border-gray-200 flex flex-col">
             {/* Logo */}
-            <div className="px-6 py-6 border-b border-gray-100">
-                <div className="flex items-center gap-3">
-                    <div className="h-9 w-9 rounded-xl bg-primary-500 flex items-center justify-center">
-                        <svg className="h-5 w-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M17 8h1a4 4 0 010 8h-1M3 8h14v9a4 4 0 01-4 4H7a4 4 0 01-4-4V8z" />
-                            <path d="M6 2v2M10 2v2M14 2v2" />
-                        </svg>
-                    </div>
-                    <div>
-                        <p className="font-bold text-gray-800 text-sm leading-tight">Café System</p>
-                        <p className="text-xs text-primary-500 font-medium capitalize">{user?.role}</p>
-                    </div>
-                </div>
+            <div className="px-6 py-5 border-b border-gray-200">
+                <span className="text-xl font-extrabold text-gray-800 tracking-tight">
+                    Vat'<span className="text-primary-500">Milktea</span>
+                </span>
+                <p className="text-xs text-gray-400 font-medium capitalize mt-0.5">{user?.role} panel</p>
             </div>
 
             {/* Navigation */}
@@ -78,10 +80,10 @@ export default function Sidebar() {
                         key={item.to}
                         to={item.to}
                         className={({ isActive }) =>
-                            `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
+                            `flex items-center gap-3 px-3 py-2.5 rounded-2xl text-sm font-semibold transition-all duration-200 ${
                                 isActive
-                                    ? 'bg-primary-50 text-primary-600'
-                                    : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'
+                                    ? 'bg-primary-500 text-white shadow-sm shadow-primary-200'
+                                    : 'text-gray-600 hover:text-primary-600 hover:bg-white hover:shadow-sm'
                             }`
                         }
                     >
@@ -92,15 +94,15 @@ export default function Sidebar() {
             </nav>
 
             {/* User profile */}
-            <div className="px-3 py-4 border-t border-gray-100">
-                <div className="flex items-center gap-3 px-3 py-2 rounded-xl bg-gray-50">
-                    <div className="h-8 w-8 rounded-full bg-primary-100 flex items-center justify-center flex-shrink-0">
-                        <span className="text-primary-600 text-xs font-bold uppercase">
+            <div className="px-3 py-4 border-t border-gray-200">
+                <div className="flex items-center gap-3 px-3 py-2.5 rounded-2xl bg-white shadow-sm border border-gray-100">
+                    <div className="h-8 w-8 rounded-full bg-primary-500 flex items-center justify-center flex-shrink-0">
+                        <span className="text-white text-xs font-bold uppercase">
                             {user?.name?.[0]}
                         </span>
                     </div>
                     <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-800 truncate">{user?.name}</p>
+                        <p className="text-sm font-semibold text-gray-800 truncate">{user?.name}</p>
                         <p className="text-xs text-gray-400 truncate">{user?.email}</p>
                     </div>
                     <button

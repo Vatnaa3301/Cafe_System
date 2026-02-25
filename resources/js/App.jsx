@@ -9,6 +9,7 @@ import DashboardPage  from './pages/admin/DashboardPage';
 import ProductsPage   from './pages/admin/ProductsPage';
 import CategoriesPage from './pages/admin/CategoriesPage';
 import OrdersPage     from './pages/admin/OrdersPage';
+import CashiersPage   from './pages/admin/CashiersPage';
 import CashierPage    from './pages/cashier/CashierPage';
 
 export default function App() {
@@ -49,6 +50,14 @@ export default function App() {
                         element={
                             <ProtectedRoute requiredRole="admin">
                                 <OrdersPage />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/admin/cashiers"
+                        element={
+                            <ProtectedRoute requiredRole="admin">
+                                <CashiersPage />
                             </ProtectedRoute>
                         }
                     />

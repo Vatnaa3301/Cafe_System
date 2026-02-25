@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { getOrders, updateOrderStatus } from '../../api/orders';
+import { getOrders, updateOrderStatus, deleteOrder } from '../../api/orders';
 import LoadingSpinner from '../common/LoadingSpinner';
 import Badge from '../common/Badge';
 import Modal from '../common/Modal';
 import Toast from '../common/Toast';
+import ConfirmDialog from '../common/ConfirmDialog';
 import { formatCurrency } from '../../utils/format';
 
 const STATUS_BADGE = {
@@ -51,9 +52,10 @@ export default function OrderList() {
     const [loading, setLoading]   = useState(true);
     const [page, setPage]         = useState(1);
     const [meta, setMeta]         = useState(null);
-    const [detail, setDetail]     = useState(null);
-    const [toast, setToast]       = useState(null);
+    const [detail, setDetail]         = useState(null);
+    const [toast, setToast]             = useState(null);
     const [statusFilter, setStatusFilter] = useState('');
+    const [deleteTarget, setDeleteTarget] = useState(null);
 
     const fetchAll = (p = 1) => {
         setLoading(true);
@@ -66,6 +68,19 @@ export default function OrderList() {
     };
 
     useEffect(() => { fetchAll(page); }, [page, statusFilter]);
+
+    const handleDelete = async () => {
+        if (!deleteTarget) return;
+        try {
+            await deleteOrder(deleteTarget.id);
+            setToast({ message: `Order #${deleteTarget.id} deleted.`, type: 'success' });
+            setDeleteTarget(null);
+            fetchAll(page);
+        } catch {
+            setToast({ message: 'Failed to delete order.', type: 'error' });
+            setDeleteTarget(null);
+        }
+    };
 
     const handleStatusChange = async (order, status) => {
         try {
@@ -133,6 +148,12 @@ export default function OrderList() {
                                                     Mark Paid
                                                 </button>
                                             )}
+                                            <button
+                                                onClick={() => setDeleteTarget(order)}
+                                                className="text-xs bg-red-50 text-red-500 hover:bg-red-100 px-3 py-1.5 rounded-lg font-medium"
+                                            >
+                                                Delete
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -154,6 +175,14 @@ export default function OrderList() {
             <Modal isOpen={!!detail} onClose={() => setDetail(null)} title={`Order #${detail?.id}`}>
                 {detail && <OrderDetail order={detail} />}
             </Modal>
+
+            <ConfirmDialog
+                isOpen={!!deleteTarget}
+                title="Delete Order"
+                message={`Are you sure you want to delete Order #${deleteTarget?.id}? This cannot be undone.`}
+                onConfirm={handleDelete}
+                onCancel={() => setDeleteTarget(null)}
+            />
         </div>
     );
 }

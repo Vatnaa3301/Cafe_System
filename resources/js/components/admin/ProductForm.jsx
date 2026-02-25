@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { createProduct, updateProduct } from '../../api/products';
+import AvailabilityToggle from '../ui/AvailabilityToggle';
+import StyledCheckbox from '../ui/StyledCheckbox';
 
 export default function ProductForm({ product, categories, onSuccess, onCancel }) {
     const [form, setForm] = useState({
@@ -58,7 +60,6 @@ export default function ProductForm({ product, categories, onSuccess, onCancel }
         fd.append('category_id',  form.category_id);
         fd.append('is_available', form.is_available ? '1' : '0');
         if (form.image) fd.append('image', form.image);
-        if (product)    fd.append('_method', 'PUT');
 
         // Sizes
         if (enableSizes && (sizeS || sizeM || sizeL)) {
@@ -171,32 +172,23 @@ export default function ProductForm({ product, categories, onSuccess, onCancel }
             </div>
 
             {/* Available toggle */}
-            <div className="flex items-center gap-3">
-                <label className="relative inline-flex items-center cursor-pointer">
-                    <input
-                        type="checkbox"
-                        name="is_available"
-                        checked={form.is_available}
-                        onChange={handleChange}
-                        className="sr-only peer"
-                    />
-                    <div className="w-10 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:bg-primary-500 transition-colors after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-5" />
-                </label>
-                <span className="text-sm text-gray-700">Available for sale</span>
+            <div className="py-1">
+                <AvailabilityToggle
+                    checked={form.is_available}
+                    onChange={handleChange}
+                    name="is_available"
+                />
             </div>
 
             {/* Cup Sizes */}
             <div className="border border-gray-100 rounded-xl p-4 space-y-3">
                 <div className="flex items-center gap-2">
-                    <input
-                        type="checkbox" id="enableSizes"
+                    <StyledCheckbox
+                        id="enableSizes"
                         checked={enableSizes}
                         onChange={(e) => setEnableSizes(e.target.checked)}
-                        className="h-4 w-4 accent-primary-500"
+                        label="Enable Cup Sizes (S / M / L)"
                     />
-                    <label htmlFor="enableSizes" className="text-sm font-semibold text-gray-700 cursor-pointer">
-                        Enable Cup Sizes (S / M / L)
-                    </label>
                 </div>
                 {enableSizes && (
                     <div className="grid grid-cols-3 gap-3">
@@ -219,15 +211,12 @@ export default function ProductForm({ product, categories, onSuccess, onCancel }
             {/* Toppings */}
             <div className="border border-gray-100 rounded-xl p-4 space-y-3">
                 <div className="flex items-center gap-2">
-                    <input
-                        type="checkbox" id="enableToppings"
+                    <StyledCheckbox
+                        id="enableToppings"
                         checked={enableToppings}
                         onChange={(e) => setEnableToppings(e.target.checked)}
-                        className="h-4 w-4 accent-primary-500"
+                        label="Enable Toppings"
                     />
-                    <label htmlFor="enableToppings" className="text-sm font-semibold text-gray-700 cursor-pointer">
-                        Enable Toppings
-                    </label>
                 </div>
                 {enableToppings && (
                     <div className="space-y-2">

@@ -7,6 +7,7 @@ export function CartProvider({ children }) {
     const [customerName, setCustomerName] = useState('');
     const [discount, setDiscount]         = useState(0);
     const [voucherCode, setVoucherCode]   = useState('');
+    const [activeCashier, setActiveCashier] = useState(null);
 
     /**
      * Add an item to the cart. Each item must have a unique `cartKey`
@@ -62,6 +63,8 @@ export function CartProvider({ children }) {
                 setDiscount,
                 voucherCode,
                 setVoucherCode,
+                activeCashier,
+                setActiveCashier,
                 addItem,
                 removeItem,
                 updateQuantity,

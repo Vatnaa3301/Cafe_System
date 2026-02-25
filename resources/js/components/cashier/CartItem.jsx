@@ -64,17 +64,17 @@ export default function CartItem({ item }) {
                     )}
                     {c.sugar && (
                         <span className="text-[10px] bg-yellow-50 text-yellow-700 border border-yellow-100 rounded-full px-2 py-0.5">
-                            🍬 {c.sugar}
+                            {c.sugar}
                         </span>
                     )}
                     {c.ice && (
                         <span className="text-[10px] bg-blue-50 text-blue-600 border border-blue-100 rounded-full px-2 py-0.5">
-                            🧊 {c.ice}
+                            {c.ice}
                         </span>
                     )}
                     {c.topping && (
                         <span className="text-[10px] bg-purple-50 text-purple-600 border border-purple-100 rounded-full px-2 py-0.5">
-                            ✨ {c.topping} · {c.topping_level}
+                            {c.topping} · {c.topping_level}
                         </span>
                     )}
                 </div>

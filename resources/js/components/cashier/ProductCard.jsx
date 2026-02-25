@@ -10,16 +10,16 @@ export default function ProductCard({ product, onCustomize }) {
     return (
         <div
             onClick={() => product.is_available && onCustomize(product)}
-            className={`card overflow-hidden cursor-pointer hover:shadow-md transition-all duration-200 group ${
+            className={`card !p-0 overflow-hidden cursor-pointer group ${
                 !product.is_available ? 'opacity-50 cursor-not-allowed' : ''
             }`}
         >
-            <div className="h-36 bg-gray-100 overflow-hidden">
+            <div className="h-52 bg-gray-100 overflow-hidden">
                 {product.image ? (
                     <img
                         src={`/storage/${product.image}`}
                         alt={product.name}
-                        className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        className="h-full w-full object-contain object-top group-hover:scale-105 transition-transform duration-300"
                     />
                 ) : (
                     <div className="h-full w-full flex items-center justify-center text-gray-300">
@@ -31,7 +31,7 @@ export default function ProductCard({ product, onCustomize }) {
                     </div>
                 )}
             </div>
-            <div className="p-3">
+            <div className="p-4">
                 <p className="text-sm font-semibold text-gray-800 leading-snug line-clamp-2">{product.name}</p>
                 {maxPrice ? (
                     <p className="text-primary-500 font-bold text-sm mt-1">
@@ -41,9 +41,9 @@ export default function ProductCard({ product, onCustomize }) {
                     <p className="text-primary-500 font-bold text-sm mt-1">{formatCurrency(product.price)}</p>
                 )}
                 {sizes && (
-                    <div className="flex gap-1 mt-1">
+                    <div className="flex gap-1 mt-2">
                         {Object.keys(sizes).map((s) => (
-                            <span key={s} className="text-[10px] bg-orange-50 text-orange-500 border border-orange-100 rounded-full px-1.5 py-0.5 font-semibold">{s}</span>
+                            <span key={s} className="size-btn">{s}</span>
                         ))}
                     </div>
                 )}

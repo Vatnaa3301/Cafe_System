@@ -8,7 +8,6 @@ import Toast from '../common/Toast';
 // ── Category form (create / edit) ─────────────────────────────────────────────
 function CategoryForm({ category, onSuccess, onCancel }) {
     const [name, setName]       = useState(category?.name ?? '');
-    const [icon, setIcon]       = useState(category?.icon ?? '');
     const [image, setImage]     = useState(null);
     const [preview, setPreview] = useState(category?.image ? `/storage/${category.image}` : null);
     const [loading, setLoading] = useState(false);
@@ -28,7 +27,6 @@ function CategoryForm({ category, onSuccess, onCancel }) {
         try {
             const fd = new FormData();
             fd.append('name', name);
-            fd.append('icon', icon);
             if (image) fd.append('image', image);
             if (category) fd.append('_method', 'PUT');
 
@@ -56,9 +54,7 @@ function CategoryForm({ category, onSuccess, onCancel }) {
                     onClick={() => document.getElementById('cat-img-input').click()}
                 >
                     {preview ? (
-                        <img src={preview} alt="preview" className="h-full w-full object-cover" />
-                    ) : icon ? (
-                        <span className="text-4xl">{icon}</span>
+                        <img src={preview} alt="preview" className="h-full w-full object-contain p-2" />
                     ) : (
                         <div className="text-center text-gray-300">
                             <svg className="h-8 w-8 mx-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -82,20 +78,10 @@ function CategoryForm({ category, onSuccess, onCancel }) {
                             required
                         />
                     </div>
-                    <div>
-                        <label className="label">Emoji Icon <span className="text-gray-400 font-normal">(shown when no image)</span></label>
-                        <input
-                            className="input"
-                            value={icon}
-                            onChange={(e) => setIcon(e.target.value)}
-                            placeholder="☕"
-                            maxLength={4}
-                        />
-                    </div>
                 </div>
             </div>
 
-            <p className="text-xs text-gray-400 -mt-2">Click the box to upload a category image (JPG/PNG, max 2 MB)</p>
+            <p className="text-xs text-gray-400 -mt-2">Click the box to upload a category icon (PNG with transparent background recommended, max 2 MB)</p>
 
             <div className="flex gap-3 pt-2 border-t border-gray-100">
                 <button type="button" onClick={onCancel} className="btn-secondary flex-1">Cancel</button>
@@ -168,24 +154,34 @@ export default function CategoryList() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     {categories.map((cat) => (
                         <div key={cat.id} className="card overflow-hidden group">
-                            {/* Image / icon banner */}
-                            <div className="h-28 bg-primary-50 overflow-hidden flex items-center justify-center">
+                            {/* Icon area */}
+                            <div className="h-28 bg-orange-50/60 flex items-center justify-center">
                                 {cat.image ? (
                                     <img
                                         src={`/storage/${cat.image}`}
                                         alt={cat.name}
-                                        className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                        className="h-20 w-20 object-contain group-hover:scale-105 transition-transform duration-300"
                                     />
                                 ) : (
-                                    <span className="text-5xl">{cat.icon || '🍽'}</span>
+                                    <svg className="h-14 w-14 text-orange-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+                                        <path d="M3 3h18v18H3z" rx="3" />
+                                        <circle cx="8.5" cy="8.5" r="1.5" />
+                                        <polyline points="21 15 16 10 5 21" />
+                                    </svg>
                                 )}
                             </div>
 
                             {/* Info row */}
                             <div className="flex items-center gap-3 px-4 py-3">
-                                {/* Emoji badge overlay */}
-                                <div className="h-10 w-10 rounded-xl bg-white shadow border border-gray-100 flex items-center justify-center text-xl flex-shrink-0 -mt-7 relative z-10">
-                                    {cat.icon || '🍽'}
+                                {/* Small icon badge */}
+                                <div className="h-10 w-10 rounded-xl bg-white shadow-sm border border-gray-100 flex items-center justify-center flex-shrink-0 -mt-7 relative z-10 overflow-hidden">
+                                    {cat.image ? (
+                                        <img src={`/storage/${cat.image}`} alt={cat.name} className="h-full w-full object-contain p-1.5" />
+                                    ) : (
+                                        <svg className="h-5 w-5 text-gray-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                            <rect x="3" y="3" width="18" height="18" rx="3" />
+                                        </svg>
+                                    )}
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <p className="font-semibold text-gray-800 truncate">{cat.name}</p>

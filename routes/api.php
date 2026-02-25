@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\BakongController;
+use App\Http\Controllers\Api\CashierController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\OrderController;
@@ -22,8 +24,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/products', [ProductController::class, 'index']);
     Route::get('/products/{product}', [ProductController::class, 'show']);
 
+    // Cashier selection list (all authenticated users)
+    Route::get('/cashiers', [CashierController::class, 'index']);
+
     // Cashier can place orders
     Route::post('/orders', [OrderController::class, 'store']);
+
+    // Bakong QR payment
+    Route::post('/bakong/generate-qr',   [BakongController::class, 'generateQr']);
+    Route::post('/bakong/check-payment', [BakongController::class, 'checkPayment']);
 
     // Admin-only routes
     Route::middleware('admin')->group(function () {
@@ -40,9 +49,16 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/products/{product}', [ProductController::class, 'update']); // POST for file upload
         Route::delete('/products/{product}', [ProductController::class, 'destroy']);
 
+        // Cashier management
+        Route::get('/cashiers/all', [CashierController::class, 'adminIndex']);
+        Route::post('/cashiers', [CashierController::class, 'store']);
+        Route::put('/cashiers/{cashier}', [CashierController::class, 'update']);
+        Route::delete('/cashiers/{cashier}', [CashierController::class, 'destroy']);
+
         // Order management
         Route::get('/orders', [OrderController::class, 'index']);
         Route::get('/orders/{order}', [OrderController::class, 'show']);
         Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus']);
+        Route::delete('/orders/{order}', [OrderController::class, 'destroy']);
     });
 });
