@@ -18,7 +18,7 @@ class DashboardController extends Controller
 
         $totalProducts   = Product::count();
         $totalCategories = \App\Models\Category::count();
-        $totalOrders     = Order::count();
+        $totalOrders     = Order::where('status', 'paid')->count();
         $totalUsers      = User::count();
 
         $todayRevenue  = Order::whereDate('created_at', $today)

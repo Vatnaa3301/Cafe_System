@@ -20,6 +20,10 @@ class OrderController extends Controller
             $query->where('status', $request->status);
         }
 
+        if ($request->filled('payment_method')) {
+            $query->where('payment_method', $request->payment_method);
+        }
+
         return response()->json($query->paginate(15));
     }
 
@@ -125,7 +129,19 @@ class OrderController extends Controller
     public function updateStatus(Request $request, Order $order)
     {
         $data = $request->validate([
-            'status' => 'required|in:pending,paid,cancelled',
+            'status' => 'required|in:paid,cancelled',
+        ]);
+
+        $order->update($data);
+
+        return response()->json($order);
+    }
+
+    public function updatePayment(Request $request, Order $order)
+    {
+        $data = $request->validate([
+            'payment_method' => 'required|in:cash,qr',
+            'currency'       => 'required|in:USD,KHR',
         ]);
 
         $order->update($data);

@@ -1,19 +1,41 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { getDashboardStats } from '../../api/dashboard';
 import StatCard from '../common/StatCard';
 import LoadingSpinner from '../common/LoadingSpinner';
 import RevenueChart from './RevenueChart';
 import { formatCurrency } from '../../utils/format';
 
-export default function Dashboard() {
-    const [stats, setStats]   = useState(null);
-    const [loading, setLoading] = useState(true);
+const REFRESH_INTERVAL_MS = 30_000;
 
-    useEffect(() => {
+export default function Dashboard() {
+    const [stats, setStats]     = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
+    const [lastUpdated, setLastUpdated] = useState(null);
+
+    const load = useCallback((silent = false) => {
+        if (silent) setRefreshing(true);
+        else setLoading(true);
+
         getDashboardStats()
-            .then(setStats)
-            .finally(() => setLoading(false));
+            .then((data) => {
+                setStats(data);
+                setLastUpdated(new Date());
+            })
+            .finally(() => {
+                setLoading(false);
+                setRefreshing(false);
+            });
     }, []);
+
+    // initial load
+    useEffect(() => { load(); }, [load]);
+
+    // auto-refresh every 30 s
+    useEffect(() => {
+        const id = setInterval(() => load(true), REFRESH_INTERVAL_MS);
+        return () => clearInterval(id);
+    }, [load]);
 
     if (loading) return <LoadingSpinner />;
     if (!stats)  return <p className="text-gray-500">Failed to load stats.</p>;
@@ -58,9 +80,28 @@ export default function Dashboard() {
                 ))}
             </div>
 
-            {/* Revenue Chart */}
+        {/* Revenue Chart */}
             <div className="card p-5">
-                <h2 className="text-base font-semibold text-gray-700 mb-4">Revenue — Last 7 Days</h2>
+                <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-base font-semibold text-gray-700">Revenue — Last 7 Days</h2>
+                    <div className="flex items-center gap-3">
+                        {lastUpdated && (
+                            <span className="text-xs text-gray-400">
+                                Updated {lastUpdated.toLocaleTimeString()}
+                            </span>
+                        )}
+                        <button
+                            onClick={() => load(true)}
+                            disabled={refreshing}
+                            className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-600 px-3 py-1.5 rounded-lg font-medium disabled:opacity-50 flex items-center gap-1.5"
+                        >
+                            <svg className={`h-3.5 w-3.5 ${refreshing ? 'animate-spin' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                            {refreshing ? 'Refreshing…' : 'Refresh'}
+                        </button>
+                    </div>
+                </div>
                 <RevenueChart data={stats.chart_data} />
             </div>
 

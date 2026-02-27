@@ -12,5 +12,8 @@ export const getOrder = (id) =>
 export const updateOrderStatus = (id, status) =>
     client.patch(`/orders/${id}/status`, { status }).then((r) => r.data);
 
+export const updateOrderPayment = (id, paymentMethod, currency) =>
+    client.patch(`/orders/${id}/payment`, { payment_method: paymentMethod, currency }).then((r) => r.data);
+
 export const deleteOrder = (id) =>
     client.delete(`/orders/${id}`).then((r) => r.data);
