@@ -69,4 +69,55 @@ class DashboardController extends Controller
             'chart_data'       => $chartData,
         ]);
     }
+
+    public function chart(Request $request)
+    {
+        $period    = $request->query('period', 'week');
+        $chartData = [];
+
+        if ($period === 'day') {
+            // Hourly breakdown for today (00:00 – 23:00)
+            $today = now()->toDateString();
+            for ($h = 0; $h < 24; $h++) {
+                $start   = now()->startOfDay()->addHours($h);
+                $end     = $start->copy()->addHour();
+                $revenue = Order::where('status', 'paid')
+                    ->whereBetween('created_at', [$start, $end])
+                    ->sum('total');
+                $chartData[] = [
+                    'date'    => str_pad($h, 2, '0', STR_PAD_LEFT) . ':00',
+                    'revenue' => $revenue,
+                ];
+            }
+        } elseif ($period === 'month') {
+            // Daily breakdown for the last 30 days
+            for ($i = 29; $i >= 0; $i--) {
+                $date    = now()->subDays($i)->toDateString();
+                $revenue = Order::whereDate('created_at', $date)
+                    ->where('status', 'paid')
+                    ->sum('total');
+                $chartData[] = [
+                    'date'    => $date,
+                    'revenue' => $revenue,
+                ];
+            }
+        } else {
+            // Default: weekly — last 7 days
+            for ($i = 6; $i >= 0; $i--) {
+                $date    = now()->subDays($i)->toDateString();
+                $revenue = Order::whereDate('created_at', $date)
+                    ->where('status', 'paid')
+                    ->sum('total');
+                $chartData[] = [
+                    'date'    => $date,
+                    'revenue' => $revenue,
+                ];
+            }
+        }
+
+        return response()->json([
+            'chart_data' => $chartData,
+            'period'     => $period,
+        ]);
+    }
 }

@@ -33,15 +33,57 @@ class TelegramService
             $productName = $item->product->name ?? 'Unknown';
             $addons      = $item->addons ?? [];
 
-            $topping     = !empty($addons['topping']) ? $addons['topping'] : 'No Topping';
-            $ice         = !empty($addons['ice'])     ? $addons['ice']     : 'Normal Ice';
-            $size        = !empty($addons['size'])    ? $addons['size']    : null;
+            $size        = $addons['size']          ?? null;
+            $sugar       = $addons['sugar']         ?? null;
+            $ice         = $addons['ice']           ?? null;
+            $topping     = $addons['topping']       ?? null;
+            $toppingLvl  = $addons['topping_level'] ?? null;
 
-            $sizeLabel   = $size ? " ({$e($size)})" : '';
-            $qty         = $item->quantity > 1 ? " x{$item->quantity}" : '';
+            $sizeLabel = $size ? " ({$e($size)})" : '';
+            $qty       = $item->quantity > 1 ? " ×{$item->quantity}" : '';
 
-            $lines[] = "🍹 <b>{$e($productName)}{$sizeLabel}{$qty}</b>";
-            $lines[] = "   └ {$e($topping)} | {$e($ice)}";
+            $lines[] = "🧋 <b>{$e($productName)}{$sizeLabel}{$qty}</b>";
+
+            // ── Ice ──────────────────────────────────────────────────────────
+            if ($ice) {
+                $iceEmoji = match (strtolower($ice)) {
+                    'no ice'     => '',
+                    'less ice'   => '',
+                    'more ice'   => '',
+                    'warm'       => '',
+                    'hot'        => '',
+                    default      => '',   // Normal Ice
+                };
+                $lines[] = "   {$iceEmoji} <b>Ice:</b> {$e($ice)}";
+            }
+
+            // ── Sugar ─────────────────────────────────────────────────────────
+            if ($sugar) {
+                $sugarEmoji = match ($sugar) {
+                    '0%'   => '',
+                    '25%'  => '',
+                    '50%'  => '',
+                    '100%' => '',
+                    '120%' => '',
+                    default => '',
+                };
+                $lines[] = "   {$sugarEmoji} <b>Sugar:</b> {$e($sugar)}";
+            }
+
+            // ── Topping ───────────────────────────────────────────────────────
+            if ($toppingLvl && strtolower($toppingLvl) === 'no topping') {
+                $lines[] = "   🚫 <b>Topping:</b> No Topping";
+            } elseif ($topping) {
+                $lvlEmoji = match (strtolower($toppingLvl ?? 'normal')) {
+                    'less'   => '➖',
+                    'more'   => '➕',
+                    default  => '',
+                };
+                $lvlLabel = $toppingLvl && strtolower($toppingLvl) !== 'normal'
+                    ? " ({$e($toppingLvl)})"
+                    : '';
+                $lines[] = "    <b>Topping:</b> {$e($topping)}{$lvlLabel} {$lvlEmoji}";
+            }
         }
 
         $lines[] = "─────────────────────";

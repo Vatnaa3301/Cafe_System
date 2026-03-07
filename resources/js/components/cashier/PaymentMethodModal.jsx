@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
+import { usdToKhr, formatKHR } from '../../utils/format';
 
 /**
  * Modern bottom-sheet payment method selection modal.
  *
  * Props:
- *   total   {number}
+ *   total   {number}  - order total in USD
  *   onCash  {Function}
  *   onQR    {Function(currency)}
  *   onClose {Function}
@@ -15,7 +16,7 @@ export default function PaymentMethodModal({ total, onCash, onQR, onClose }) {
 
     const displayTotal = currency === 'USD'
         ? `$${Number(total).toFixed(2)}`
-        : `${Math.round(total).toLocaleString()} រៀល`;
+        : formatKHR(usdToKhr(total));
 
     const handleProceed = () => {
         if (selectedMethod === 'cash') onCash();

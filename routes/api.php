@@ -38,6 +38,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('admin')->group(function () {
         // Dashboard
         Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
+        Route::get('/dashboard/chart', [DashboardController::class, 'chart']);
 
         // Category management
         Route::post('/categories', [CategoryController::class, 'store']);

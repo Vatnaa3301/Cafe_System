@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import QRCode from 'react-qr-code';
 import { generateQR, checkPayment } from '../../api/bakong';
 import HamsterLoader from './HamsterLoader';
+import { usdToKhr, formatKHR } from '../../utils/format';
 
 const POLL_INTERVAL_MS = 3000;   // 3 seconds
 const TIMEOUT_CYCLES   = 60;     // 60 × 3s = 3 minutes
@@ -27,10 +28,13 @@ export default function QRPaymentModal({ amount, currency, onSuccess, onClose })
     const intervalRef = useRef(null);
     const cycleRef    = useRef(0);
 
+    // amount is always in USD from CartContext; convert to KHR when needed
+    const apiAmount = currency === 'KHR' ? usdToKhr(amount) : amount;
+
     // Format amount for display
     const displayAmount = currency === 'USD'
         ? `$${Number(amount).toFixed(2)}`
-        : `${Math.round(amount).toLocaleString()} ៛`;
+        : formatKHR(apiAmount);
 
     // ---------------------------------------------------------------
     // Generate QR on mount
@@ -47,7 +51,7 @@ export default function QRPaymentModal({ amount, currency, onSuccess, onClose })
 
         (async () => {
             try {
-                const res = await generateQR({ amount, currency });
+                const res = await generateQR({ amount: apiAmount, currency });
                 if (cancelled) return;
                 setQrString(res.qrString);
                 setMd5(res.md5);

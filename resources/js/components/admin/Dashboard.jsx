@@ -1,17 +1,25 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { getDashboardStats } from '../../api/dashboard';
+import { getDashboardStats, getChartData } from '../../api/dashboard';
 import StatCard from '../common/StatCard';
 import LoadingSpinner from '../common/LoadingSpinner';
 import RevenueChart from './RevenueChart';
 import { formatCurrency } from '../../utils/format';
 
 const REFRESH_INTERVAL_MS = 30_000;
+const PERIODS = [
+    { key: 'day',   label: 'Day' },
+    { key: 'week',  label: 'Week' },
+    { key: 'month', label: 'Month' },
+];
 
 export default function Dashboard() {
-    const [stats, setStats]     = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [stats, setStats]         = useState(null);
+    const [loading, setLoading]     = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [lastUpdated, setLastUpdated] = useState(null);
+    const [period, setPeriod]       = useState('week');
+    const [chartData, setChartData] = useState(null);
+    const [chartLoading, setChartLoading] = useState(false);
 
     const load = useCallback((silent = false) => {
         if (silent) setRefreshing(true);
@@ -28,14 +36,27 @@ export default function Dashboard() {
             });
     }, []);
 
+    const loadChart = useCallback((p, silent = false) => {
+        if (!silent) setChartLoading(true);
+        getChartData(p)
+            .then(setChartData)
+            .finally(() => setChartLoading(false));
+    }, []);
+
     // initial load
     useEffect(() => { load(); }, [load]);
 
+    // load chart whenever period changes
+    useEffect(() => { loadChart(period); }, [period, loadChart]);
+
     // auto-refresh every 30 s
     useEffect(() => {
-        const id = setInterval(() => load(true), REFRESH_INTERVAL_MS);
+        const id = setInterval(() => {
+            load(true);
+            loadChart(period, true);
+        }, REFRESH_INTERVAL_MS);
         return () => clearInterval(id);
-    }, [load]);
+    }, [load, loadChart, period]);
 
     if (loading) return <LoadingSpinner />;
     if (!stats)  return <p className="text-gray-500">Failed to load stats.</p>;
@@ -83,7 +104,28 @@ export default function Dashboard() {
         {/* Revenue Chart */}
             <div className="card p-5">
                 <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-base font-semibold text-gray-700">Revenue — Last 7 Days</h2>
+                    <div className="flex items-center gap-3">
+                        <h2 className="text-base font-semibold text-gray-700">
+                            Revenue —{' '}
+                            {period === 'day' ? 'Today' : period === 'week' ? 'Last 7 Days' : 'Last 30 Days'}
+                        </h2>
+                        {/* Period filter pills */}
+                        <div className="flex items-center gap-1">
+                            {PERIODS.map(({ key, label }) => (
+                                <button
+                                    key={key}
+                                    onClick={() => setPeriod(key)}
+                                    className={`text-xs px-3 py-1 rounded-full font-medium transition-colors ${
+                                        period === key
+                                            ? 'bg-orange-500 text-white'
+                                            : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                                    }`}
+                                >
+                                    {label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
                     <div className="flex items-center gap-3">
                         {lastUpdated && (
                             <span className="text-xs text-gray-400">
@@ -91,7 +133,7 @@ export default function Dashboard() {
                             </span>
                         )}
                         <button
-                            onClick={() => load(true)}
+                            onClick={() => { load(true); loadChart(period, true); }}
                             disabled={refreshing}
                             className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-600 px-3 py-1.5 rounded-lg font-medium disabled:opacity-50 flex items-center gap-1.5"
                         >
@@ -102,7 +144,11 @@ export default function Dashboard() {
                         </button>
                     </div>
                 </div>
-                <RevenueChart data={stats.chart_data} />
+                {chartLoading ? (
+                    <div className="flex items-center justify-center h-[220px] text-gray-400 text-sm">Loading…</div>
+                ) : (
+                    <RevenueChart data={chartData ?? stats.chart_data} period={period} />
+                )}
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
