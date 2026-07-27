@@ -35,6 +35,9 @@ return [
         'api_url'      => env('BAKONG_API_URL', 'https://api-bakong.nbc.gov.kh'),
         'api_token'    => env('BAKONG_API_TOKEN'),
         'account_id'   => env('BAKONG_ACCOUNT_ID'),
+        // Optional: KHQR tag 29 subtag 01 (SDK: IndividualInfo accountInformation).
+        // Official individual example omits this; only set BAKONG_GUI if provider asks.
+        'gui'           => env('BAKONG_GUI'),
         'merchant_name' => env('BAKONG_MERCHANT_NAME', 'CAFE'),
         'merchant_city' => env('BAKONG_MERCHANT_CITY', 'PHNOMPENH'),
     ],

@@ -72,7 +72,7 @@ const SIZE_NAMES = { S: 'Small', M: 'Medium', L: 'Large' };
 // ─── Option data ──────────────────────────────────────────────────────────────
 const SUGAR_OPTIONS         = ['0%', '25%', '50%', '70%', '100%', '120%'];
 const ICE_OPTIONS           = ['No Ice', 'Less Ice', 'Normal Ice', 'More Ice', 'Warm', 'Hot'];
-const TOPPING_LEVEL_OPTIONS = ['No Topping', 'Less', 'Normal', 'More'];
+const TOPPING_LEVEL_OPTIONS = ['Less', 'Normal', 'More'];
 
 // ─── Section Header ───────────────────────────────────────────────────────────
 function SectionHeader({ title, required }) {
@@ -201,10 +201,15 @@ export default function CustomizeModal({ product, onClose }) {
     const hasSizes    = product.sizes && Object.keys(product.sizes).length > 0;
     const hasToppings = product.toppings && product.toppings.length > 0;
     const defaultSize = hasSizes ? Object.keys(product.sizes)[0] : null;
+    const iceOptions  = product.ice_levels && product.ice_levels.length > 0
+        ? product.ice_levels
+        : ICE_OPTIONS;
 
     const [size, setSize]                 = useState(defaultSize);
     const [sugar, setSugar]               = useState('100%');
-    const [ice, setIce]                   = useState('Normal Ice');
+    const [ice, setIce]                   = useState(
+        iceOptions.includes('Normal Ice') ? 'Normal Ice' : iceOptions[0] ?? ''
+    );
     const [topping, setTopping]           = useState('none');
     const [toppingLevel, setToppingLevel] = useState('Normal');
 
@@ -362,7 +367,7 @@ export default function CustomizeModal({ product, onClose }) {
                         <section>
                             <SectionHeader title="Ice Level" required />
                             <div className="flex flex-wrap" style={{ gap: 8 }}>
-                                {ICE_OPTIONS.map((label) => (
+                                {iceOptions.map((label) => (
                                     <SegmentBtn
                                         key={label}
                                         label={label}

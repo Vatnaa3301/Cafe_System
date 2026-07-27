@@ -27,6 +27,7 @@ class TelegramService
         $lines[] = "";
         $lines[] = "📋 <b>Order No:</b> <code>{$orderNo}</code>";
         $lines[] = "👤 <b>Customer:</b> " . $e($order->customer_name ?: 'Walk-in');
+        $lines[] = "🧑‍💼 <b>Cashier:</b> " . $e($order->cashier_name ?: 'N/A');
         $lines[] = "─────────────────────";
 
         foreach ($order->items as $item) {

@@ -2,85 +2,66 @@
 
 namespace App\Services;
 
+use KHQR\BakongKHQR;
+use KHQR\Helpers\KHQRData;
+use KHQR\Models\IndividualInfo;
+
 class KhqrService
 {
     /**
-     * Build a TLV (Tag-Length-Value) element for EMVCo QR.
-     * Format: TT LL VALUE  (tag 2 chars, length 2 chars zero-padded, value)
-     */
-    private function tlv(string $tag, string $value): string
-    {
-        return $tag . str_pad(strlen($value), 2, '0', STR_PAD_LEFT) . $value;
-    }
-
-    /**
-     * CRC-16/CCITT (CRC-16-IBM-SDLC / X.25)
-     * Polynomial : 0x1021
-     * Init value : 0xFFFF
-     * No reflection, XOR out: 0x0000
-     */
-    private function crc16(string $data): string
-    {
-        $crc = 0xFFFF;
-        for ($i = 0, $len = strlen($data); $i < $len; $i++) {
-            $crc ^= (ord($data[$i]) << 8);
-            for ($j = 0; $j < 8; $j++) {
-                if ($crc & 0x8000) {
-                    $crc = (($crc << 1) ^ 0x1021) & 0xFFFF;
-                } else {
-                    $crc = ($crc << 1) & 0xFFFF;
-                }
-            }
-        }
-        return strtoupper(sprintf('%04X', $crc));
-    }
-
-    /**
      * Generate a KHQR (EMVCo QR) string for Bakong.
+     *
+     * This uses the official `khqr-gateway/bakong-khqr-php` SDK to ensure the
+     * payload structure (including Timestamp tag `99`) matches what bank apps
+     * validate. If the payload is missing required fields, apps can show errors
+     * like "QR is expired".
      *
      * @param float  $amount    Transaction amount
      * @param string $currency  'USD' or 'KHR'
-     * @param string $reference Short reference label (max 25 chars)
+     * @param string $reference Unused in QR payload (kept for API compatibility). Correlation is via md5 poll.
      */
     public function generateQrString(float $amount, string $currency, string $reference): string
     {
-        $currencyCode = ($currency === 'USD') ? '840' : '116';
+        $accountId = (string) config('services.bakong.account_id');
+        // SDK README: minimal Individual KHQR uses only bakongAccountID in tag 29 (no subtag 01).
+        // Forcing a default GUI here caused ABA to reject scans as MAPP-KHQR-INV-FORMAT.
+        $gui = config('services.bakong.gui');
+        $accountInformation = (is_string($gui) && $gui !== '') ? $gui : null;
+        $merchantName = mb_substr((string) config('services.bakong.merchant_name'), 0, 25);
+        $merchantCity = mb_substr((string) config('services.bakong.merchant_city'), 0, 15);
 
-        // USD: 2 decimal places; KHR: whole number (0 decimals)
-        $amountStr = ($currency === 'USD')
-            ? number_format($amount, 2, '.', '')
-            : (string) (int) round($amount);
+        $currencyCode = ($currency === 'USD') ? KHQRData::CURRENCY_USD : KHQRData::CURRENCY_KHR;
 
-        $accountId    = config('services.bakong.account_id');
-        $merchantName = mb_substr(config('services.bakong.merchant_name'), 0, 25);
-        $merchantCity = mb_substr(config('services.bakong.merchant_city'), 0, 15);
+        // Do not put order reference in tag 62 (terminalLabel). The official minimal sample has no tag 62;
+        // ABA Scan often returns MAPP-KHQR-INV-FORMAT when tag 62 content does not match their rules.
 
-        // Tag 29 — Merchant Account Information (Bakong KHQR format)
-        // Sub-tag 00 holds the Bakong account ID
-        $merchantAccountContent = $this->tlv('00', $accountId);
-        $merchantAccount        = $this->tlv('29', $merchantAccountContent);
+        $info = new IndividualInfo(
+            $accountId,
+            $merchantName,
+            $merchantCity,
+            null, // acquiringBank
+            $accountInformation, // optional GUI / accountInformation (omit unless provider requires)
+            $currencyCode,
+            $amount,
+            null, // billNumber
+            null, // storeLabel
+            null, // terminalLabel
+            null, // mobileNumber
+            null, // purposeOfTransaction
+            null, // languagePreference
+            null, // merchantNameAlternateLanguage
+            null, // merchantCityAlternateLanguage
+            null, // upiMerchantAccount
+        );
 
-        // Tag 62 — Additional Data Field Template
-        // Sub-tag 05 = Reference Label
-        $additionalDataContent = $this->tlv('05', mb_substr($reference, 0, 25));
-        $additionalData        = $this->tlv('62', $additionalDataContent);
+        $result = BakongKHQR::generateIndividual($info);
 
-        // Assemble QR (without CRC value, but WITH the "6304" CRC prefix)
-        $qr  = $this->tlv('00', '01');           // Payload format indicator
-        $qr .= $this->tlv('01', '12');           // Point of initiation: dynamic
-        $qr .= $merchantAccount;                  // Merchant account
-        $qr .= $this->tlv('52', '5999');         // MCC: general merchandise
-        $qr .= $this->tlv('53', $currencyCode);  // Transaction currency
-        $qr .= $this->tlv('54', $amountStr);     // Transaction amount
-        $qr .= $this->tlv('58', 'KH');           // Country code
-        $qr .= $this->tlv('59', $merchantName);  // Merchant name
-        $qr .= $this->tlv('60', $merchantCity);  // Merchant city
-        $qr .= $additionalData;                   // Additional data
-        $qr .= '6304';                            // CRC tag + length placeholder
+        // $result->data is ['qr' => string, 'md5' => string]
+        $qr = (string) ($result->data['qr'] ?? '');
+        if ($qr === '') {
+            throw new \RuntimeException('KHQR SDK returned an empty QR string');
+        }
 
-        // CRC is calculated over everything including the "6304" placeholder
-        $crc = $this->crc16($qr);
-
-        return $qr . $crc;
+        return $qr;
     }
 }

@@ -130,7 +130,7 @@ export default function QRPaymentModal({ amount, currency, onSuccess, onClose })
 
         (async () => {
             try {
-                const res = await generateQR({ amount, currency });
+                const res = await generateQR({ amount: apiAmount, currency });
                 setQrString(res.qrString);
                 setMd5(res.md5);
                 setShortLink(res.shortLink);
@@ -201,10 +201,10 @@ export default function QRPaymentModal({ amount, currency, onSuccess, onClose })
                             <div className="rounded-2xl border-2 border-gray-100 bg-white p-4 shadow-inner">
                                 <QRCode
                                     value={qrString}
-                                    size={190}
+                                    size={220}
                                     bgColor="#ffffff"
                                     fgColor="#111827"
-                                    level="M"
+                                    level="H"
                                 />
                             </div>
 

@@ -22,6 +22,17 @@ export default function ProductForm({ product, categories, onSuccess, onCancel }
     const [sizeM, setSizeM]               = useState(product?.sizes?.M ?? '');
     const [sizeL, setSizeL]               = useState(product?.sizes?.L ?? '');
 
+    // ── Ice Levels ─────────────────────────────────────────────────────────
+    const ALL_ICE_OPTIONS = ['No Ice', 'Less Ice', 'Normal Ice', 'More Ice', 'Warm', 'Hot'];
+    const [enableIceLevels, setEnableIceLevels] = useState(!!(product?.ice_levels?.length));
+    const [iceLevels, setIceLevels] = useState(
+        product?.ice_levels?.length ? product.ice_levels : [...ALL_ICE_OPTIONS]
+    );
+    const toggleIceLevel = (opt) =>
+        setIceLevels((prev) =>
+            prev.includes(opt) ? prev.filter((o) => o !== opt) : [...prev, opt]
+        );
+
     // ── Toppings ───────────────────────────────────────────────────────────
     const [enableToppings, setEnableToppings] = useState(!!(product?.toppings?.length));
     const [toppings, setToppings]             = useState(
@@ -70,6 +81,13 @@ export default function ProductForm({ product, categories, onSuccess, onCancel }
             }));
         } else {
             fd.append('sizes', '');
+        }
+
+        // Ice Levels
+        if (enableIceLevels && iceLevels.length > 0) {
+            fd.append('ice_levels', JSON.stringify(iceLevels));
+        } else {
+            fd.append('ice_levels', '');
         }
 
         // Toppings
@@ -203,6 +221,44 @@ export default function ProductForm({ product, categories, onSuccess, onCancel }
                                     className="input"
                                 />
                             </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+
+            {/* Ice Levels */}
+            <div className="border border-gray-100 rounded-xl p-4 space-y-3">
+                <StyledCheckbox
+                    id="enableIceLevels"
+                    checked={enableIceLevels}
+                    onChange={(e) => setEnableIceLevels(e.target.checked)}
+                    label="Customize Ice Level Options"
+                />
+                {enableIceLevels && (
+                    <div className="flex flex-wrap gap-2">
+                        {ALL_ICE_OPTIONS.map((opt) => (
+                            <label
+                                key={opt}
+                                className="flex items-center gap-1.5 cursor-pointer select-none"
+                                style={{
+                                    border: iceLevels.includes(opt) ? '1px solid #C96A3D' : '1px solid #EAEAEA',
+                                    borderRadius: 20,
+                                    padding: '5px 12px',
+                                    background: iceLevels.includes(opt) ? '#FFF6F1' : '#FFFFFF',
+                                    fontSize: 13,
+                                    color: iceLevels.includes(opt) ? '#C96A3D' : '#555',
+                                    fontWeight: iceLevels.includes(opt) ? 600 : 400,
+                                    transition: 'all 0.15s',
+                                }}
+                            >
+                                <input
+                                    type="checkbox"
+                                    className="hidden"
+                                    checked={iceLevels.includes(opt)}
+                                    onChange={() => toggleIceLevel(opt)}
+                                />
+                                {opt}
+                            </label>
                         ))}
                     </div>
                 )}

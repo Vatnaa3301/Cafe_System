@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Services\KhqrService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
 
 class BakongController extends Controller
@@ -33,6 +34,14 @@ class BakongController extends Controller
 
         $md5 = md5($qrString);
 
+        Log::info('KHQR Generated', [
+            'amount'    => $data['amount'],
+            'currency'  => $data['currency'],
+            'reference' => $reference,
+            'qr'        => $qrString,
+            'md5'       => $md5,
+        ]);
+
         // Call Bakong API to get deep-link
         $shortLink = null;
         try {
@@ -56,8 +65,24 @@ class BakongController extends Controller
 
             $body      = $resp->json();
             $shortLink = $body['data']['shortLink'] ?? null;
+
+            if ($shortLink === null) {
+                Log::warning('Bakong deeplink not returned', [
+                    'reference' => $reference,
+                    'md5'       => $md5,
+                    'currency'  => $data['currency'],
+                    'amount'    => $data['amount'],
+                    'response'  => $body,
+                ]);
+            }
         } catch (\Exception) {
             // Deeplink is optional – QR still works for direct scanning
+            Log::warning('Bakong deeplink request failed', [
+                'reference' => $reference,
+                'md5'       => $md5,
+                'currency'  => $data['currency'],
+                'amount'    => $data['amount'],
+            ]);
         }
 
         return response()->json([

@@ -39,9 +39,10 @@ class ProductController extends Controller
             $data['image'] = $request->file('image')->store('products', 'public');
         }
 
-        // Handle sizes JSON string from FormData
-        $data['sizes']    = $request->input('sizes')    ? json_decode($request->input('sizes'), true)    : null;
-        $data['toppings'] = $request->input('toppings') ? json_decode($request->input('toppings'), true) : null;
+        // Handle sizes / toppings / ice_levels JSON strings from FormData
+        $data['sizes']      = $request->input('sizes')      ? json_decode($request->input('sizes'), true)      : null;
+        $data['toppings']   = $request->input('toppings')   ? json_decode($request->input('toppings'), true)   : null;
+        $data['ice_levels'] = $request->input('ice_levels') ? json_decode($request->input('ice_levels'), true) : null;
 
         $product = Product::create($data);
 
@@ -71,9 +72,10 @@ class ProductController extends Controller
             $data['image'] = $request->file('image')->store('products', 'public');
         }
 
-        // Handle sizes / toppings JSON strings from FormData
-        $data['sizes']    = $request->input('sizes')    ? json_decode($request->input('sizes'), true)    : null;
-        $data['toppings'] = $request->input('toppings') ? json_decode($request->input('toppings'), true) : null;
+        // Handle sizes / toppings / ice_levels JSON strings from FormData
+        $data['sizes']      = $request->input('sizes')      ? json_decode($request->input('sizes'), true)      : null;
+        $data['toppings']   = $request->input('toppings')   ? json_decode($request->input('toppings'), true)   : null;
+        $data['ice_levels'] = $request->input('ice_levels') ? json_decode($request->input('ice_levels'), true) : null;
 
         $product->update($data);
 
