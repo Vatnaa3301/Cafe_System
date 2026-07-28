@@ -90,9 +90,13 @@ class TelegramService
         $lines[] = "─────────────────────";
 
         $orderType     = $order->order_type ?? 'Pick up';
-        $paymentMethod = strtolower($order->payment_method ?? 'cash') === 'qr'
-            ? 'Bakong QR (' . strtoupper($order->currency ?? 'USD') . ')'
-            : 'Cash';
+        $methodKey     = strtolower($order->payment_method ?? 'cash');
+        $curr          = strtoupper($order->currency ?? 'USD');
+        $paymentMethod = match ($methodKey) {
+            'card'  => "Card/Digital ({$curr})",
+            'qr'    => "QR Code ({$curr})",
+            default => "Cash ({$curr})",
+        };
 
         $lines[] = "🚚 <b>Order Type:</b> {$e($orderType)}";
         $lines[] = "💳 <b>Payment:</b> {$e($paymentMethod)}";

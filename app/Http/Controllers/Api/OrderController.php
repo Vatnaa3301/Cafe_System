@@ -39,7 +39,7 @@ class OrderController extends Controller
             'voucher_code'      => 'nullable|string',
             'discount'          => 'nullable|numeric|min:0',
             'notes'             => 'nullable|string',
-            'payment_method'    => 'nullable|in:cash,qr',
+            'payment_method'    => 'nullable|in:cash,card,qr',
             'currency'          => 'nullable|in:USD,KHR',
             'order_type'        => 'nullable|string|max:50',
         ]);
@@ -140,7 +140,7 @@ class OrderController extends Controller
     public function updatePayment(Request $request, Order $order)
     {
         $data = $request->validate([
-            'payment_method' => 'required|in:cash,qr',
+            'payment_method' => 'required|in:cash,card,qr',
             'currency'       => 'required|in:USD,KHR',
         ]);
 

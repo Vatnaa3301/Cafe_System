@@ -3,8 +3,6 @@ import { useCart } from '../../context/CartContext';
 import { createOrder } from '../../api/orders';
 import CartItem from './CartItem';
 import PaymentMethodModal from './PaymentMethodModal';
-import QRPaymentModal from './QRPaymentModal';
-import PaymentSuccessAnimation from './PaymentSuccessAnimation';
 import { formatCurrency } from '../../utils/format';
 import Toast from '../common/Toast';
 import styled from 'styled-components';
@@ -62,12 +60,9 @@ export default function Cart() {
     const [orderType, setOrderType]         = useState('Pick up');
     const [receipt, setReceipt]             = useState(null);
     const [showPaymentModal, setShowPaymentModal] = useState(false);
-    const [qrCurrency, setQrCurrency]       = useState(null); // non-null = QR modal visible
-    const [successAnimCurrency, setSuccessAnimCurrency] = useState(null); // non-null = play success anim
 
     const handleCheckoutWithMethod = async (paymentMethod = 'cash', currency = 'USD') => {
         setShowPaymentModal(false);
-        setQrCurrency(null);
         setLoading(true);
         try {
             // Snapshot items before clearing cart
@@ -119,41 +114,8 @@ export default function Cart() {
             {showPaymentModal && (
                 <PaymentMethodModal
                     total={total}
-                    onCash={() => handleCheckoutWithMethod('cash', 'USD')}
-                    onQR={(currency) => {
-                        setShowPaymentModal(false);
-                        setQrCurrency(currency);
-                    }}
+                    onConfirm={(method, currency) => handleCheckoutWithMethod(method, currency)}
                     onClose={() => setShowPaymentModal(false)}
-                />
-            )}
-
-            {/* QR Payment Modal */}
-            {qrCurrency && (
-                <QRPaymentModal
-                    amount={total}
-                    currency={qrCurrency}
-                    onSuccess={() => {
-                        // Hand off to success animation; animation calls checkout on complete
-                        const confirmedCurrency = qrCurrency;
-                        setQrCurrency(null);
-                        setSuccessAnimCurrency(confirmedCurrency);
-                    }}
-                    onClose={() => {
-                        setQrCurrency(null);
-                        setShowPaymentModal(true);
-                    }}
-                />
-            )}
-
-            {/* Payment success animation → then receipt */}
-            {successAnimCurrency && (
-                <PaymentSuccessAnimation
-                    onComplete={() => {
-                        const cur = successAnimCurrency;
-                        setSuccessAnimCurrency(null);
-                        handleCheckoutWithMethod('qr', cur);
-                    }}
                 />
             )}
 
@@ -217,7 +179,7 @@ export default function Cart() {
                                 <div className="flex justify-between text-sm">
                                     <span className="text-gray-500">Payment Method</span>
                                     <span className="font-semibold text-gray-800">
-                                        {receipt.payment_method === 'qr' ? `Bakong QR (${receipt.currency})` : 'Cash'}
+                                         {receipt.payment_method === 'card' ? `Card/Digital (${receipt.currency})` : `Cash (${receipt.currency})`}
                                     </span>
                                 </div>
                                 <div className="flex justify-between text-sm">
@@ -308,7 +270,7 @@ export default function Cart() {
                                         <hr/>
                                         <div class="row"><span class="label">Ref Number</span><span class="value">${String(receipt.id).padStart(12,'0')}</span></div>
                                         <div class="row"><span class="label">Merchant Name</span><span class="value">Vat' Milktea</span></div>
-                                        <div class="row"><span class="label">Payment Method</span><span class="value">${receipt.payment_method === 'qr' ? `Bakong QR (${receipt.currency})` : 'Cash'}</span></div>
+                                        <div class="row"><span class="label">Payment Method</span><span class="value">${receipt.payment_method === 'card' ? `Card/Digital (${receipt.currency})` : `Cash (${receipt.currency})`}</span></div>
                                         <div class="row"><span class="label">Payment Time</span><span class="value">${receipt.created_at}</span></div>
                                         ${receipt.cashier_name ? `<div class="row"><span class="label">Cashier</span><span class="value">${receipt.cashier_name}</span></div>` : ''}
                                         <div class="row"><span class="label">Customer</span><span class="value">${receipt.customer_name}</span></div>

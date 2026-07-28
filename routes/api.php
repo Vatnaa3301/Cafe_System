@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\BakongController;
 use App\Http\Controllers\Api\CashierController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\DashboardController;
@@ -29,10 +28,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Cashier can place orders
     Route::post('/orders', [OrderController::class, 'store']);
-
-    // Bakong QR payment
-    Route::post('/bakong/generate-qr',   [BakongController::class, 'generateQr']);
-    Route::post('/bakong/check-payment', [BakongController::class, 'checkPayment']);
 
     // Admin-only routes
     Route::middleware('admin')->group(function () {

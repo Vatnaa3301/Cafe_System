@@ -2,16 +2,15 @@ import React, { useState } from 'react';
 import { usdToKhr, formatKHR } from '../../utils/format';
 
 /**
- * Modern bottom-sheet payment method selection modal.
+ * Modern bottom-sheet payment method selection modal for normal checkout.
  *
  * Props:
- *   total   {number}  - order total in USD
- *   onCash  {Function}
- *   onQR    {Function(currency)}
- *   onClose {Function}
+ *   total     {number}   - order total in USD
+ *   onConfirm {Function(method, currency)} - called to process normal checkout
+ *   onClose   {Function}
  */
-export default function PaymentMethodModal({ total, onCash, onQR, onClose }) {
-    const [selectedMethod, setSelectedMethod] = useState(null);
+export default function PaymentMethodModal({ total, onConfirm, onClose }) {
+    const [selectedMethod, setSelectedMethod] = useState('cash');
     const [currency, setCurrency] = useState('USD');
 
     const displayTotal = currency === 'USD'
@@ -19,8 +18,9 @@ export default function PaymentMethodModal({ total, onCash, onQR, onClose }) {
         : formatKHR(usdToKhr(total));
 
     const handleProceed = () => {
-        if (selectedMethod === 'cash') onCash();
-        else if (selectedMethod === 'qr') onQR(currency);
+        if (selectedMethod) {
+            onConfirm(selectedMethod, currency);
+        }
     };
 
     return (
@@ -34,10 +34,6 @@ export default function PaymentMethodModal({ total, onCash, onQR, onClose }) {
                         from { transform: translateY(60px); opacity: 0; }
                         to   { transform: translateY(0);    opacity: 1; }
                     }
-                    @keyframes pmm-slide {
-                        from { transform: translateY(8px); opacity: 0; }
-                        to   { transform: translateY(0);   opacity: 1; }
-                    }
                 `}</style>
 
                 {/* Drag handle */}
@@ -46,10 +42,10 @@ export default function PaymentMethodModal({ total, onCash, onQR, onClose }) {
                 </div>
 
                 {/* Title + amount */}
-                <div className="px-6 pt-2 pb-5 text-center">
+                <div className="px-6 pt-2 pb-4 text-center">
                     <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-1">Checkout</p>
                     <p className="text-4xl font-black text-gray-900 tracking-tight">{displayTotal}</p>
-                    <p className="text-sm text-gray-400 mt-1">Select how the customer will pay</p>
+                    <p className="text-sm text-gray-400 mt-1">Select payment method to complete order</p>
                 </div>
 
                 {/* Payment options */}
@@ -72,8 +68,8 @@ export default function PaymentMethodModal({ total, onCash, onQR, onClose }) {
                             </svg>
                         </div>
                         <div className="text-left flex-1">
-                            <p className={`font-bold text-[15px] ${ selectedMethod === 'cash' ? 'text-emerald-700' : 'text-gray-800'}`}>Cash</p>
-                            <p className="text-xs text-gray-400 mt-0.5">Accept physical payment</p>
+                            <p className={`font-bold text-[15px] ${ selectedMethod === 'cash' ? 'text-emerald-700' : 'text-gray-800'}`}>Cash Payment</p>
+                            <p className="text-xs text-gray-400 mt-0.5">Physical cash transaction</p>
                         </div>
                         <div className={`h-5 w-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
                             selectedMethod === 'cash' ? 'border-emerald-500 bg-emerald-500' : 'border-gray-300'
@@ -86,33 +82,30 @@ export default function PaymentMethodModal({ total, onCash, onQR, onClose }) {
                         </div>
                     </button>
 
-                    {/* Bakong QR */}
+                    {/* Standard / Digital Payment */}
                     <button
-                        onClick={() => setSelectedMethod('qr')}
+                        onClick={() => setSelectedMethod('card')}
                         className={`w-full flex items-center gap-4 rounded-2xl px-5 py-4 border-2 transition-all duration-200 ${
-                            selectedMethod === 'qr'
+                            selectedMethod === 'card'
                                 ? 'border-blue-500 bg-blue-50 shadow-md shadow-blue-100'
                                 : 'border-gray-100 bg-gray-50 hover:border-gray-300'
                         }`}
                     >
                         <div className={`h-12 w-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors ${
-                            selectedMethod === 'qr' ? 'bg-blue-500' : 'bg-gray-200'
+                            selectedMethod === 'card' ? 'bg-blue-500' : 'bg-gray-200'
                         }`}>
-                            <svg className={`h-6 w-6 ${ selectedMethod === 'qr' ? 'text-white' : 'text-gray-500'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                            <svg className={`h-6 w-6 ${ selectedMethod === 'card' ? 'text-white' : 'text-gray-500'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                             </svg>
                         </div>
                         <div className="text-left flex-1">
-                            <div className="flex items-center gap-2">
-                                <p className={`font-bold text-[15px] ${ selectedMethod === 'qr' ? 'text-blue-700' : 'text-gray-800'}`}>Bakong QR</p>
-                                <span className="text-[10px] font-bold bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded-full">NBC</span>
-                            </div>
-                            <p className="text-xs text-gray-400 mt-0.5">Scan with any Bakong-supported app</p>
+                            <p className={`font-bold text-[15px] ${ selectedMethod === 'card' ? 'text-blue-700' : 'text-gray-800'}`}>Card / Digital Payment</p>
+                            <p className="text-xs text-gray-400 mt-0.5">Credit/Debit Card or Transfer</p>
                         </div>
                         <div className={`h-5 w-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-                            selectedMethod === 'qr' ? 'border-blue-500 bg-blue-500' : 'border-gray-300'
+                            selectedMethod === 'card' ? 'border-blue-500 bg-blue-500' : 'border-gray-300'
                         }`}>
-                            {selectedMethod === 'qr' && (
+                            {selectedMethod === 'card' && (
                                 <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                                 </svg>
@@ -120,54 +113,38 @@ export default function PaymentMethodModal({ total, onCash, onQR, onClose }) {
                         </div>
                     </button>
 
-                    {/* Currency toggle — slides in when QR selected */}
-                    {selectedMethod === 'qr' && (
-                        <div
-                            className="rounded-2xl border border-gray-100 bg-gray-50 p-3"
-                            style={{ animation: 'pmm-slide 0.25s ease both' }}
-                        >
-                            <p className="text-xs text-gray-400 text-center mb-2 font-medium">Select Currency</p>
-                            <div className="grid grid-cols-2 gap-2">
-                                {['USD', 'KHR'].map((c) => (
-                                    <button
-                                        key={c}
-                                        onClick={() => setCurrency(c)}
-                                        className={`py-2.5 rounded-xl text-sm font-bold transition-all duration-200 ${
-                                            currency === c
-                                                ? 'bg-blue-600 text-white shadow-md shadow-blue-200'
-                                                : 'bg-white text-gray-600 border border-gray-200 hover:border-blue-300'
-                                        }`}
-                                    >
-                                        {c === 'USD' ? '$ USD' : '៛ KHR'}
-                                    </button>
-                                ))}
-                            </div>
+                    {/* Currency selector */}
+                    <div className="rounded-2xl border border-gray-100 bg-gray-50 p-3 mt-2">
+                        <p className="text-xs text-gray-400 text-center mb-2 font-medium">Select Currency</p>
+                        <div className="grid grid-cols-2 gap-2">
+                            {['USD', 'KHR'].map((c) => (
+                                <button
+                                    key={c}
+                                    onClick={() => setCurrency(c)}
+                                    className={`py-2 rounded-xl text-sm font-bold transition-all duration-200 ${
+                                        currency === c
+                                            ? 'bg-gray-900 text-white shadow-md'
+                                            : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-400'
+                                    }`}
+                                >
+                                    {c === 'USD' ? '$ USD' : '៛ KHR'}
+                                </button>
+                            ))}
                         </div>
-                    )}
+                    </div>
                 </div>
 
                 {/* Actions */}
-                <div className="px-4 pb-8 pt-4 space-y-2.5">
+                <div className="px-4 pb-6 pt-3 space-y-2">
                     <button
                         onClick={handleProceed}
-                        disabled={!selectedMethod}
-                        className={`w-full py-3.5 rounded-2xl font-bold text-sm transition-all duration-200 ${
-                            !selectedMethod
-                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                : selectedMethod === 'cash'
-                                    ? 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-200'
-                                    : 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-200'
-                        }`}
+                        className="w-full py-3.5 rounded-2xl font-bold text-sm bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-200 transition-all duration-200"
                     >
-                        {!selectedMethod
-                            ? 'Select a payment method'
-                            : selectedMethod === 'cash'
-                                ? '✓  Confirm Cash Payment'
-                                : '⚡  Generate QR Code'}
+                        ✓ Confirm Checkout
                     </button>
                     <button
                         onClick={onClose}
-                        className="w-full py-3 rounded-2xl text-sm font-semibold text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors"
+                        className="w-full py-2.5 rounded-2xl text-sm font-semibold text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors"
                     >
                         Cancel
                     </button>
@@ -176,3 +153,4 @@ export default function PaymentMethodModal({ total, onCash, onQR, onClose }) {
         </div>
     );
 }
+
