@@ -31,6 +31,10 @@ class CafeSeeder extends Seeder
             ]
         );
 
+        // ─── Cashiers ──────────────────────────────────────────────
+        \App\Models\Cashier::updateOrCreate(['name' => 'Vatana'], ['active' => true]);
+        \App\Models\Cashier::updateOrCreate(['name' => 'Cashier 1'], ['active' => true]);
+
         // ─── Categories & Products ─────────────────────────────────
         $coffeeSizes   = ['S' => 3.99, 'M' => 4.99, 'L' => 5.99];
         $nonCoffeeSizes = ['S' => 3.49, 'M' => 4.49, 'L' => 5.49];

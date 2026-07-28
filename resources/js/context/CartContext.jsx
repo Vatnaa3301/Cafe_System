@@ -7,7 +7,18 @@ export function CartProvider({ children }) {
     const [customerName, setCustomerName] = useState('');
     const [discount, setDiscount]         = useState(0);
     const [voucherCode, setVoucherCode]   = useState('');
-    const [activeCashier, setActiveCashier] = useState(null);
+    const [activeCashier, setActiveCashierState] = useState(
+        () => localStorage.getItem('active_cashier') || 'Vatana'
+    );
+
+    const setActiveCashier = (name) => {
+        setActiveCashierState(name);
+        if (name) {
+            localStorage.setItem('active_cashier', name);
+        } else {
+            localStorage.removeItem('active_cashier');
+        }
+    };
 
     /**
      * Add an item to the cart. Each item must have a unique `cartKey`

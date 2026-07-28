@@ -84,7 +84,7 @@ const DemoBox = styled.div`
 export default function LoginForm() {
     const { login }          = useAuth();
     const navigate           = useNavigate();
-    const [form, setForm]    = useState({ email: '', password: '' });
+    const [form, setForm]    = useState({ email: 'cashier@cafe.com', password: 'password' });
     const [error, setError]  = useState('');
     const [loading, setLoading] = useState(false);
 
