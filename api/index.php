@@ -37,6 +37,9 @@ $_SERVER['APP_ROUTES_CACHE']   = "{$bootstrapCachePath}/routes-v7.php";
 $_SERVER['APP_CONFIG_CACHE']   = "{$bootstrapCachePath}/config.php";
 $_SERVER['LOG_CHANNEL']         = "stderr";
 
+// Override SCRIPT_NAME to prevent Laravel from stripping /api from request URIs on Vercel
+$_SERVER['SCRIPT_NAME'] = '/index.php';
+
 try {
     require __DIR__ . '/../public/index.php';
 } catch (\Throwable $e) {
