@@ -60,7 +60,9 @@ return [
             'engine' => null,
             'timezone' => '+07:00',
             'options' => extension_loaded('pdo_mysql') ? array_filter([
-                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+                (class_exists(\Pdo\Mysql::class) && defined('\Pdo\Mysql::ATTR_SSL_CA'))
+                    ? \Pdo\Mysql::ATTR_SSL_CA
+                    : (defined('PDO::MYSQL_ATTR_SSL_CA') ? PDO::MYSQL_ATTR_SSL_CA : 1012) => env('MYSQL_ATTR_SSL_CA'),
             ]) : [],
         ],
 
