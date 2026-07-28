@@ -17,7 +17,7 @@ export default function ProductCard({ product, onCustomize }) {
             <div className="h-52 bg-gray-100 overflow-hidden">
                 {product.image ? (
                     <img
-                        src={`/storage/${product.image}`}
+                        src={product.image.startsWith('http') || product.image.startsWith('/') ? product.image : `/storage/${product.image}`}
                         alt={product.name}
                         className="h-full w-full object-contain object-top group-hover:scale-105 transition-transform duration-300"
                     />

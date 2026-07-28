@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { useCart } from '../../context/CartContext';
 import { formatCurrency } from '../../utils/format';
 import styled from 'styled-components';
@@ -265,7 +265,7 @@ export default function CustomizeModal({ product, onClose }) {
                     >
                         {product.image ? (
                             <img
-                                src={`/storage/${product.image}`}
+                                src={product.image.startsWith('http') || product.image.startsWith('/') ? product.image : `/storage/${product.image}`}
                                 alt={product.name}
                                 className="h-full w-full object-cover"
                             />

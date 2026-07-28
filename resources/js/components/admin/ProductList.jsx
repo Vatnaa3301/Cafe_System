@@ -104,7 +104,7 @@ export default function ProductList() {
                                         <td className="px-4 py-3">
                                             {product.image ? (
                                                 <img
-                                                    src={`/storage/${product.image}`}
+                                                    src={product.image.startsWith('http') || product.image.startsWith('/') ? product.image : `/storage/${product.image}`}
                                                     alt={product.name}
                                                     className="h-10 w-10 rounded-lg object-cover"
                                                 />

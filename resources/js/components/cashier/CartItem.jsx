@@ -12,7 +12,7 @@ export default function CartItem({ item }) {
                 {/* Thumbnail */}
                 <div className="h-10 w-10 rounded-lg bg-gray-100 overflow-hidden flex-shrink-0">
                     {item.image ? (
-                        <img src={`/storage/${item.image}`} alt={item.name} className="h-full w-full object-cover" />
+                        <img src={item.image.startsWith('http') || item.image.startsWith('/') ? item.image : `/storage/${item.image}`} alt={item.name} className="h-full w-full object-cover" />
                     ) : (
                         <div className="h-full flex items-center justify-center text-gray-300">
                             <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/></svg>
