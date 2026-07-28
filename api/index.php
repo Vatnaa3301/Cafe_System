@@ -1,6 +1,6 @@
 <?php
 
-// Prepare writable storage directories in /tmp for Vercel read-only filesystem
+// Ensure /tmp/storage directories exist for Vercel serverless environment
 $storageDirs = [
     '/tmp/storage/app/public',
     '/tmp/storage/framework/views',
@@ -15,22 +15,15 @@ foreach ($storageDirs as $dir) {
     }
 }
 
-define('LARAVEL_START', microtime(true));
+try {
+    require __DIR__ . '/../public/index.php';
+} catch (\Throwable $e) {
+    http_response_code(500);
+    header('Content-Type: text/plain; charset=utf-8');
+    echo "Vercel Execution Exception:\n";
+    echo $e->getMessage() . "\n\n";
+    echo "In " . $e->getFile() . " on line " . $e->getLine() . "\n\n";
+    echo $e->getTraceAsString();
+}
 
-require __DIR__ . '/../vendor/autoload.php';
-
-$app = require_once __DIR__ . '/../bootstrap/app.php';
-
-// Force Laravel to use /tmp/storage instead of read-only project storage directory
-$app->useStoragePath('/tmp/storage');
-
-$kernel = $app->make(\Illuminate\Contracts\Http\Kernel::class);
-
-$response = $kernel->handle(
-    $request = \Illuminate\Http\Request::capture()
-);
-
-$response->send();
-
-$kernel->terminate($request, $response);
 
