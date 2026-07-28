@@ -52,4 +52,26 @@ $app->singleton(
 |
 */
 
+if (isset($_ENV['VERCEL']) || isset($_SERVER['VERCEL']) || env('VERCEL') || is_dir('/tmp')) {
+    $storagePath = '/tmp/storage';
+    $bootstrapCachePath = '/tmp/bootstrap/cache';
+
+    $dirs = [
+        $storagePath . '/app/public',
+        $storagePath . '/framework/cache/data',
+        $storagePath . '/framework/sessions',
+        $storagePath . '/framework/views',
+        $storagePath . '/logs',
+        $bootstrapCachePath,
+    ];
+
+    foreach ($dirs as $dir) {
+        if (!is_dir($dir)) {
+            @mkdir($dir, 0755, true);
+        }
+    }
+
+    $app->useStoragePath($storagePath);
+}
+
 return $app;
