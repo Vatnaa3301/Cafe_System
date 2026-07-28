@@ -25,7 +25,12 @@ class AuthController extends Controller
             ]);
         }
 
-        $token = $user->createToken('auth_token')->plainTextToken;
+        $token = 'cafe_' . base64_encode(json_encode([
+            'id'    => $user->id,
+            'email' => $user->email,
+            'role'  => $user->role,
+            'time'  => time(),
+        ]));
 
         return response()->json([
             'user'  => $user,
@@ -35,7 +40,9 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
+        if ($request->user() && method_exists($request->user(), 'currentAccessToken') && $request->user()->currentAccessToken()) {
+            @$request->user()->currentAccessToken()->delete();
+        }
 
         return response()->json(['message' => 'Logged out successfully.']);
     }
